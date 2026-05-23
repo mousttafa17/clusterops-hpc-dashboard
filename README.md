@@ -534,8 +534,6 @@ Planned:
 
 ## Future Improvements
 
-- Containerize the app with Docker Compose
-- Add Nginx as a reverse proxy
 - Add Prometheus scraping and Grafana dashboards
 - Add AWS deployment guide
 - Add CI checks for backend typecheck and frontend lint/build
