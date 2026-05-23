@@ -293,6 +293,72 @@ Open:
 http://localhost:3000
 ```
 
+## Docker Development
+
+The Docker setup runs the frontend, backend API, MongoDB, and Nginx reverse proxy together.
+
+Run the full stack with:
+
+```bash
+docker compose up --build
+```
+
+Services:
+
+```text
+App through Nginx: http://localhost:8080
+Frontend direct:   http://localhost:3000
+Backend direct:    http://localhost:5001
+MongoDB: localhost:27017
+```
+
+Verified Docker entry points:
+
+```text
+Frontend app:        http://localhost:8080
+Metrics page:        http://localhost:8080/metrics
+Backend health:      http://localhost:8080/health
+Prometheus metrics:  http://localhost:8080/prometheus
+```
+
+Inside Docker, the backend connects to MongoDB with:
+
+```text
+mongodb://mongo:27017/clusterops
+```
+
+The frontend container is built with:
+
+```text
+NEXT_PUBLIC_API_URL=http://localhost:8080
+```
+
+This lets the browser call backend routes through Nginx at the same Docker entry point.
+
+Nginx routes:
+
+```text
+/           -> frontend:3000
+/api/*      -> backend:5001
+/health     -> backend:5001
+/metrics    -> frontend:3000
+/prometheus -> backend:5001/metrics
+```
+
+If you already have local MongoDB, the local backend, the local frontend, or another reverse proxy running on ports `27017`, `5001`, `3000`, or `8080`, stop those services before running Docker Compose.
+
+Stop containers:
+
+```bash
+docker compose down
+```
+
+Stop containers and remove the MongoDB volume:
+
+```bash
+docker compose down -v
+```
+
 ## Demo Login
 
 If you already created the local admin user, log in with:
@@ -400,6 +466,12 @@ Prometheus metrics:
 curl http://localhost:5001/metrics
 ```
 
+When running through Docker/Nginx:
+
+```bash
+curl http://localhost:8080/prometheus
+```
+
 ## Frontend Pages
 
 ```text
@@ -442,11 +514,13 @@ Completed:
 - Prometheus-style metrics endpoint
 - Next.js frontend pages
 - Protected frontend layout
+- Docker Compose stack for frontend, backend, and MongoDB
+- Production backend Dockerfile
+- Production frontend Dockerfile
+- Nginx reverse proxy for the Docker stack
 
 Planned:
 
-- Docker Compose for frontend, backend, and MongoDB
-- Nginx reverse proxy
 - Prometheus and Grafana services
 - AWS deployment notes
 - More detailed job detail page

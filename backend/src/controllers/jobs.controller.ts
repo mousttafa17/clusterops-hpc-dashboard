@@ -30,7 +30,7 @@ export const listJobsController = async (req: Request, res: Response) => {
 };
 
 export const getJobController = async (req: Request, res: Response) => {
-  const job = await getJobById(req.params.id, String(req.user!._id), req.user!.role);
+  const job = await getJobById(String(req.params.id), String(req.user!._id), req.user!.role);
 
   return res.status(200).json({
     success: true,
@@ -39,7 +39,7 @@ export const getJobController = async (req: Request, res: Response) => {
 };
 
 export const cancelJobController = async (req: Request, res: Response) => {
-  const job = await cancelJob(req.params.id, String(req.user!._id), req.user!.role);
+  const job = await cancelJob(String(req.params.id), String(req.user!._id), req.user!.role);
 
   return res.status(200).json({
     success: true,

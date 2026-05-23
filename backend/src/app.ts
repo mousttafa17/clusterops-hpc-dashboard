@@ -2,6 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import morgan from 'morgan';
+import mongoose from 'mongoose';
 import { env } from './config/env';
 import authRoutes from './routes/auth.routes';
 import jobsRoutes from './routes/jobs.routes';
@@ -28,9 +29,16 @@ app.use(express.urlencoded({ extended: true }));
 app.use(morgan(env.NODE_ENV === 'development' ? 'dev' : 'combined'));
 
 app.get('/health', (_req, res) => {
-  return res.status(200).json({
+  const databaseConnected = mongoose.connection.readyState === 1;
+
+  return res.status(databaseConnected ? 200 : 503).json({
     success: true,
+    status: databaseConnected ? 'ok' : 'degraded',
     message: 'ClusterOps backend is healthy',
+    database: {
+      connected: databaseConnected,
+      readyState: mongoose.connection.readyState
+    },
     uptime: process.uptime(),
     timestamp: new Date().toISOString()
   });

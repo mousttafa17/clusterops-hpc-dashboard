@@ -48,8 +48,11 @@ const userSchema = new Schema<IUserDocument>(
 
 userSchema.set('toJSON', {
   transform: (_doc, ret) => {
-    delete ret.passwordHash;
-    delete ret.__v;
+    const user = ret as unknown as Record<string, unknown>;
+
+    delete user.passwordHash;
+    delete user.__v;
+
     return ret;
   }
 });

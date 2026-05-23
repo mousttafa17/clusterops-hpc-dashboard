@@ -364,7 +364,7 @@ export default function MetricsPage() {
               <div className="mt-6 rounded-xl border border-slate-800 bg-slate-950 p-4">
                 <p className="text-sm font-medium text-slate-300">Prometheus Endpoint</p>
                 <p className="mt-2 break-all font-mono text-sm text-cyan-200">
-                  {getApiUrl()}/metrics
+                  {getApiUrl()}/prometheus
                 </p>
                 <p className="mt-3 text-sm text-slate-500">
                   Exposes text-format counters for jobs, nodes, CPU, memory, and GPU capacity.
