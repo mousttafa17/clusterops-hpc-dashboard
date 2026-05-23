@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Activity, AlertCircle, CheckCircle2, Clock, Cpu, Server } from "lucide-react";
-import { api } from "@/lib/api";
+import { api, getApiErrorMessage } from "@/lib/api";
 import { ProtectedLayout } from "@/components/layout/ProtectedLayout";
 import { MetricsOverview } from "@/types/metrics";
 
@@ -26,21 +26,22 @@ export default function DashboardPage() {
         metricsResponse.data?.data || metricsResponse.data?.metrics || metricsResponse.data;
 
       setMetrics(metricsData);
-    } catch (err: any) {
-      setError(
-        err?.response?.data?.message ||
-          err?.response?.data?.error ||
-          "Failed to load dashboard data."
-      );
+    } catch (err: unknown) {
+      setError(getApiErrorMessage(err, "Failed to load dashboard data."));
     }
   }
 
   useEffect(() => {
-    loadDashboard();
+    queueMicrotask(() => {
+      void loadDashboard();
+    });
   }, []);
 
   const jobs = metrics?.jobs || {};
   const cluster = metrics?.cluster || {};
+  const activeJobs = (jobs.queued ?? 0) + (jobs.running ?? 0);
+  const queuePressure =
+    (jobs.total ?? 0) > 0 ? Math.round((activeJobs / (jobs.total ?? 1)) * 100) : 0;
 
   const cards = [
     {
@@ -150,18 +151,49 @@ export default function DashboardPage() {
         </div>
 
         <div className="rounded-2xl border border-slate-800 bg-slate-900 p-6">
-          <h3 className="text-lg font-semibold">Phase 3 Status</h3>
+          <h3 className="text-lg font-semibold">Queue Health</h3>
 
-          <ul className="mt-5 space-y-3 text-sm text-slate-300">
-            <li>✅ Next.js frontend created</li>
-            <li>✅ Login/register pages connected to backend</li>
-            <li>✅ JWT stored in browser localStorage</li>
-            <li>✅ Protected dashboard shell created</li>
-            <li>✅ Metrics loaded from backend API</li>
-          </ul>
+          <div className="mt-5 grid gap-4 sm:grid-cols-2">
+            <QueueMetric label="Active Jobs" value={activeJobs} />
+            <QueueMetric label="Completed" value={jobs.completed ?? 0} />
+            <QueueMetric label="Failed" value={jobs.failed ?? 0} />
+            <QueueMetric label="Cancelled" value={jobs.cancelled ?? 0} />
+          </div>
+
+          <div className="mt-5">
+            <div className="mb-2 flex items-center justify-between text-sm">
+              <span className="text-slate-300">Queue Pressure</span>
+              <span className="text-slate-400">{queuePressure}%</span>
+            </div>
+
+            <div className="h-3 overflow-hidden rounded-full bg-slate-800">
+              <div
+                className="h-full rounded-full bg-cyan-400"
+                style={{ width: `${queuePressure}%` }}
+              />
+            </div>
+
+            <p className="mt-3 text-sm text-slate-500">
+              Based on queued and running jobs as a share of total submitted jobs.
+            </p>
+          </div>
         </div>
       </section>
     </ProtectedLayout>
+  );
+}
+
+type QueueMetricProps = {
+  label: string;
+  value: number;
+};
+
+function QueueMetric({ label, value }: QueueMetricProps) {
+  return (
+    <div className="rounded-xl border border-slate-800 bg-slate-950 px-4 py-3">
+      <p className="text-xs text-slate-500">{label}</p>
+      <p className="mt-1 text-2xl font-bold text-slate-100">{value}</p>
+    </div>
   );
 }
 

@@ -13,16 +13,18 @@ export function ProtectedLayout({ children }: ProtectedLayoutProps) {
   const [userName, setUserName] = useState("");
 
   useEffect(() => {
-    const token = loadAuthFromStorage();
-    const user = getStoredUser();
+    queueMicrotask(() => {
+      const token = loadAuthFromStorage();
+      const user = getStoredUser();
 
-    if (!token) {
-      window.location.href = "/login";
-      return;
-    }
+      if (!token) {
+        window.location.href = "/login";
+        return;
+      }
 
-    setUserName(user?.name || "ClusterOps User");
-    setReady(true);
+      setUserName(user?.name || "ClusterOps User");
+      setReady(true);
+    });
   }, []);
 
   if (!ready) {

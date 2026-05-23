@@ -7,6 +7,9 @@ export type MetricsOverview = {
     failed?: number;
     cancelled?: number;
   };
+  users?: {
+    total?: number;
+  };
   cluster?: {
     totalNodes?: number;
     onlineNodes?: number;
@@ -17,4 +20,9 @@ export type MetricsOverview = {
     totalGpus?: number;
     availableGpus?: number;
   };
+};
+
+export type MetricsOverviewResponse = {
+  success: boolean;
+  data: MetricsOverview;
 };

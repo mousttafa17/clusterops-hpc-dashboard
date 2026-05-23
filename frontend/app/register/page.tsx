@@ -2,7 +2,7 @@
 
 import { FormEvent, useState } from "react";
 import Link from "next/link";
-import { api } from "@/lib/api";
+import { api, getApiErrorMessage } from "@/lib/api";
 import { extractAuthPayload, saveAuth } from "@/lib/auth";
 import { AuthResponse, UserRole } from "@/types/auth";
 
@@ -30,12 +30,8 @@ export default function RegisterPage() {
       const { token, user } = extractAuthPayload(response.data);
       saveAuth(token, user);
       window.location.href = "/dashboard";
-    } catch (err: any) {
-      const message =
-        err?.response?.data?.message ||
-        err?.response?.data?.error ||
-        "Registration failed.";
-      setError(message);
+    } catch (err: unknown) {
+      setError(getApiErrorMessage(err, "Registration failed."));
     } finally {
       setLoading(false);
     }

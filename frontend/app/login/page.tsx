@@ -2,7 +2,7 @@
 
 import { FormEvent, useState } from "react";
 import Link from "next/link";
-import { api } from "@/lib/api";
+import { api, getApiErrorMessage } from "@/lib/api";
 import { extractAuthPayload, saveAuth } from "@/lib/auth";
 import { AuthResponse } from "@/types/auth";
 
@@ -24,14 +24,12 @@ export default function LoginPage() {
       });
 
       const { token, user } = extractAuthPayload(response.data);
-    saveAuth(token, user);
-    window.location.href = "/dashboard";
-    } catch (err: any) {
-      const message =
-        err?.response?.data?.message ||
-        err?.response?.data?.error ||
-        "Login failed. Please check your credentials.";
-      setError(message);
+      saveAuth(token, user);
+      window.location.href = "/dashboard";
+    } catch (err: unknown) {
+      setError(
+        getApiErrorMessage(err, "Login failed. Please check your credentials.")
+      );
     } finally {
       setLoading(false);
     }

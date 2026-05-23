@@ -54,15 +54,27 @@ export function logout() {
   window.location.href = "/login";
 }
 
-export function extractAuthPayload(responseData: any) {
-  const payload = responseData?.data || responseData;
+export function extractAuthPayload(responseData: unknown) {
+  const responseObject =
+    responseData && typeof responseData === "object"
+      ? (responseData as { data?: unknown })
+      : null;
+  const payload = responseObject?.data || responseData;
+  const payloadObject =
+    payload && typeof payload === "object"
+      ? (payload as { token?: unknown; user?: unknown })
+      : null;
 
-  if (!payload?.token || !payload?.user) {
+  if (
+    typeof payloadObject?.token !== "string" ||
+    !payloadObject.user ||
+    typeof payloadObject.user !== "object"
+  ) {
     throw new Error("Login response did not include a valid token and user.");
   }
 
   return {
-    token: payload.token,
-    user: payload.user,
+    token: payloadObject.token,
+    user: payloadObject.user as StoredUser,
   };
 }
